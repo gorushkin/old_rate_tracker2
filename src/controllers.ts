@@ -1,10 +1,11 @@
 import TelegramBot, { Message, CallbackQuery } from 'node-telegram-bot-api';
 import { CALL_BACK_DATA, defaultOptions } from './constants';
-import { formatMessage, getRates } from './utils';
+import { scheduler } from './scheduler';
+import { formatMessage } from './utils';
 
 const mapping: Record<CALL_BACK_DATA, () => Promise<string>> = {
   GET_RATES: async () => {
-    const { rate, date } = await getRates();
+    const { rate, date } = (await scheduler).getInfo();
     return formatMessage(rate, date);
   },
   TEST: async () => 'This is the test!!!',
@@ -27,7 +28,7 @@ export const onStart = async (message: Message, bot: TelegramBot) => {
 
 export const onGetRates = async (message: Message, bot: TelegramBot) => {
   const chatId = message.chat.id;
-  const { rate, date } = await getRates();
+  const { rate, date } = (await scheduler).getInfo();
 
   bot.sendMessage(chatId, formatMessage(rate, date), defaultOptions);
 };
