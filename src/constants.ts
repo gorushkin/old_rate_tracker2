@@ -38,4 +38,4 @@ export const defaultOptions: SendMessageOptions = {
   },
 };
 
-export const currencies: Currency[] = ['USD', 'NZD', 'EUR'];
+export const currencies: Currency[] = ['USD', 'NZD', 'EUR', 'TRY'];
