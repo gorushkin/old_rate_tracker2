@@ -1,4 +1,5 @@
 import { InlineKeyboardButton, SendMessageOptions } from 'node-telegram-bot-api';
+import { Currency } from './types';
 
 export const minute = 1000 * 60;
 
@@ -36,3 +37,5 @@ export const defaultOptions: SendMessageOptions = {
     inline_keyboard: defaultKeyboard,
   },
 };
+
+export const currencies: Currency[] = ['USD', 'NZD', 'EUR'];

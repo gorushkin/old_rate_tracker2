@@ -1,25 +1,31 @@
-import { getRate } from './api';
+import { getRates } from './api';
 import { minute } from './constants';
+import { Rates } from './types';
 
 export const syncRate = () => {
-  let rate: string | null = null;
   let lastUpdateTime = 0;
+  let rates: Rates;
 
   return async () => {
     const currentTime = Date.now();
     const shouldUpdate = currentTime - lastUpdateTime >= minute * 10;
     if (shouldUpdate) {
-      rate = await getRate();
+      rates = await getRates();
       lastUpdateTime = currentTime;
     }
 
     const formattedLastUpdateTime = new Date(lastUpdateTime).toLocaleString();
 
-    return { rate, date: formattedLastUpdateTime };
+    return { rates, date: formattedLastUpdateTime };
   };
 };
 
-export const getRates = syncRate();
+export const getRate = syncRate();
 
-export const formatMessage = (rate: string | null, date: string) =>
-  rate ? `${rate}\n${date}` : 'There is no rates yet';
+export const convertRatesToString = (data: Rates, date: string) => {
+  const formattedRates = Object.entries(data)
+    .map(([currency, rate]) => `${currency} - ${rate}`)
+    .join('\n');
+
+  return `${date}\n\n${formattedRates}`;
+};
