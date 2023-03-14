@@ -5,6 +5,7 @@ dev.sqlite*
 dev.db*
 package-lock.json
 build
+dist
 
 # dependencies
 /node_modules
