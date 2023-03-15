@@ -4,7 +4,7 @@ import { Rates } from './types';
 
 export const updateRates = async () => {
   let date: string;
-  let rates: Rates;
+  let rates = {} as Rates;
 
   const start = async () => {
     rates = await getRates();

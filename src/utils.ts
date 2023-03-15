@@ -27,5 +27,5 @@ export const convertRatesToString = (data: Rates, date: string) => {
     .map(([currency, rate]) => `${currency} - ${rate}`)
     .join('\n');
 
-  return `${date}\n\n${formattedRates}`;
+  return `${date}\n\n${formattedRates || 'we are fetching the data'}`;
 };
