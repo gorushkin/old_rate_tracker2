@@ -28,7 +28,7 @@ const onStart = async (message: Message, bot: TelegramBot) => {
   const chatId = message.chat.id;
   const username = message.chat.username || 'username';
 
-  bot.sendMessage(chatId, `Hi, ${username}`);
+  bot.sendMessage(chatId, `Hi, ${username}`, defaultOptions);
 };
 
 const onGetRates = async (message: Message, bot: TelegramBot) => {
