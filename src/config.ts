@@ -1,5 +1,6 @@
+
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-export const { TOKEN } = process.env;
+export const { TOKEN, ADMIN_ID } = process.env;
