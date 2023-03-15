@@ -29,21 +29,3 @@ export const convertRatesToString = (data: Rates, date: string) => {
 
   return `${date}\n\n${formattedRates || 'we are fetching the data'}`;
 };
-
-const logVault = () => {
-  const logs: string[] = [];
-
-  const addLog = ({ username, action }: { username?: string; action: string }) => {
-    const currentDate = new Date();
-    const hh = currentDate.getHours();
-    const mm = currentDate.getMinutes();
-    const log = `${logs.length + 1} - [${hh}:${mm}] - ${username || 'null'} - ${action}`;
-    logs.push(log);
-  };
-
-  const getLogs = () => logs.join('\n');
-
-  return { addLog, getLogs };
-};
-
-export const logger = logVault();

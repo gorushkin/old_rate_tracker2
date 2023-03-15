@@ -1,8 +1,9 @@
 import TelegramBot, { Message, CallbackQuery } from 'node-telegram-bot-api';
 import { CALL_BACK_DATA, defaultOptions } from './constants';
-import { convertRatesToString, logger } from './utils';
+import { convertRatesToString } from './utils';
 import { scheduler } from './scheduler';
 import { ADMIN_ID } from './config';
+import { logger } from './logger';
 
 const mapping: Record<CALL_BACK_DATA, () => Promise<string>> = {
   GET_RATES: async () => {
@@ -16,7 +17,10 @@ const onCallbackQuery = async (message: CallbackQuery, bot: TelegramBot) => {
   const data = message.data as CALL_BACK_DATA;
   const chat_id = message.from.id;
   const messageText = await mapping[data]();
-  logger.addLog({ username: message.from.username, action: `onCallbackQuery - ${data}` });
+  logger.addUserRequestLog({
+    username: message.from.username,
+    action: `onCallbackQuery - ${data}`,
+  });
   bot.sendMessage(chat_id, messageText, defaultOptions);
 };
 
@@ -30,13 +34,13 @@ const onStart = async (message: Message, bot: TelegramBot) => {
 const onGetRates = async (message: Message, bot: TelegramBot) => {
   const chatId = message.chat.id;
   const { rates, date } = (await scheduler).getInfo();
-  logger.addLog({ username: message.chat.username, action: 'onGetRates' });
+  logger.addUserRequestLog({ username: message.chat.username, action: 'onGetRates' });
   bot.sendMessage(chatId, convertRatesToString(rates, date), defaultOptions);
 };
 
 const onGetLogs = async (message: Message, bot: TelegramBot) => {
   const chatId = message.chat.id;
-  logger.addLog({ username: message.chat.username, action: 'onGetLogs' });
+  logger.addUserRequestLog({ username: message.chat.username, action: 'onGetLogs' });
   const logs = logger.getLogs();
   const id = message.from?.id;
   const messageText = id == ADMIN_ID ? logs : 'No!!!';
