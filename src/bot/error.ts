@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { logger } from './logger';
+import { logger } from '../logger';
 
 export class BotError extends Error {
   constructor(message: string) {

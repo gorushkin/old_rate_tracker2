@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { currencies } from './constants';
-import { Currency, Rates } from './types';
+import { Currency, Rates } from '../types';
 
 const getApiUrl = (currency: Currency, baseCurrency: Currency = 'RUB') =>
   `https://api.coingate.com/v2/rates/merchant/${currency}/${baseCurrency}`;

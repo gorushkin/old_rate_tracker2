@@ -1,6 +1,6 @@
 import { getRates } from './api';
 import { minute } from './constants';
-import { Rates } from './types';
+import { Rates } from '../types';
 
 export const syncRate = () => {
   let lastUpdateTime = 0;
