@@ -1,33 +1,81 @@
-import TelegramBot, { Message, CallbackQuery } from 'node-telegram-bot-api';
-import { CALL_BACK_DATA, defaultOptions } from './constants';
+import TelegramBot, {
+  Message,
+  CallbackQuery,
+  SendMessageOptions,
+  EditMessageTextOptions,
+} from 'node-telegram-bot-api';
+import { CALL_BACK_DATA } from './constants';
 import { convertRatesToString, getUserRates } from './utils';
 import { scheduler } from '../utils/scheduler';
 import { ADMIN_ID } from '../utils/config';
 import { logger } from '../utils/logger';
 import { userService } from '../services/UserService';
 import { User } from '../entity/user';
+import { defaultOptions, settingsKeyboardOptions } from './keyboard';
+import { BotError } from './error';
+import { state } from './botState';
 
-type Mapping = Record<CALL_BACK_DATA, (user: User | null) => Promise<string>>;
+type Mapping = Record<
+  CALL_BACK_DATA,
+  (user: User | null) => Promise<{ message: string; options: EditMessageTextOptions }>
+>;
 
 const mapping: Mapping = {
   GET_RATES: async (user) => {
     const { rates, date } = (await scheduler).getInfo();
     const userRates = getUserRates(rates, user);
-    return convertRatesToString(userRates, date);
+    const message = convertRatesToString(userRates, date);
+    const options = defaultOptions;
+    return { message, options };
   },
-  TEST: async () => 'This is the test!!!',
+  TEST: async () => {
+    const message = 'This is the test!!!';
+    return { message, options: defaultOptions };
+  },
+  SETTINGS: async () => {
+    const message = 'settings';
+    return { message, options: settingsKeyboardOptions };
+  },
+  CURRENCIES: async () => {
+    const message = 'CURRENCIES';
+    return { message, options: settingsKeyboardOptions };
+  },
+  REMINDER: async () => {
+    const message = 'REMINDER';
+    return { message, options: settingsKeyboardOptions };
+  },
+  TIME_ZONE: async () => {
+    const message = 'TIME_ZONE';
+    return { message, options: settingsKeyboardOptions };
+  },
 };
 
-const onCallbackQuery = async (message: CallbackQuery, bot: TelegramBot) => {
-  const data = message.data as CALL_BACK_DATA;
-  const id = message.from.id;
+const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
+  if (!query.message) {
+    throw new BotError('The re is no message!!!!!');
+  }
+  const {
+    message_id,
+    chat: { id: chat_id },
+  } = query.message;
+
+  const data = query.data as CALL_BACK_DATA;
+  const id = query.from.id;
   const user = await userService.getUser(id);
-  const messageText = await mapping[data](user);
+  const { message, options } = await mapping[data](user);
+
+  state.setState(id, data);
+
   logger.addUserRequestLog({
-    username: message.from.username,
+    username: query.from.username,
     action: `onCallbackQuery - ${data}`,
   });
-  bot.sendMessage(id, messageText, defaultOptions);
+
+  bot.editMessageText(message, {
+    chat_id,
+    message_id,
+    ...options,
+  });
 };
 
 const onStart = async (message: Message, bot: TelegramBot) => {
@@ -61,4 +109,8 @@ const onGetLogs = async (message: Message, bot: TelegramBot) => {
   bot.sendMessage(chatId, messageText, defaultOptions);
 };
 
-export const services = { onCallbackQuery, onStart, onGetRates, onGetLogs };
+const onMessage = async (message: Message, bot: TelegramBot) => {
+  console.log('message: ', message);
+};
+
+export const services = { onCallbackQuery, onStart, onGetRates, onGetLogs, onMessage };

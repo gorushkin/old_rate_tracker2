@@ -1,4 +1,3 @@
-import { InlineKeyboardButton, SendMessageOptions } from 'node-telegram-bot-api';
 import { Currency } from '../types';
 
 export const minute = 1000 * 60;
@@ -11,7 +10,7 @@ export enum COMMAND {
 }
 
 export const commandsList = [
-  { command: COMMAND.START, description: "Let's go" },
+  { command: COMMAND.START, description: 'Let\'s go' },
   { command: COMMAND.INFO, description: 'Some info' },
   { command: COMMAND.GET_RATE, description: 'Get usd rate' },
   { command: COMMAND.GET_LOGS, description: 'Get all logs' },
@@ -20,25 +19,11 @@ export const commandsList = [
 export enum CALL_BACK_DATA {
   GET_RATES = 'GET_RATES',
   TEST = 'TEST',
+  SETTINGS = 'SETTINGS',
+  TIME_ZONE = 'TIME_ZONE',
+  CURRENCIES = 'CURRENCIES',
+  REMINDER = 'REMINDER',
 }
-
-const getRatesButton: InlineKeyboardButton = {
-  text: 'Get rates',
-  callback_data: CALL_BACK_DATA.GET_RATES,
-};
-
-const testButton: InlineKeyboardButton = {
-  text: 'Test',
-  callback_data: CALL_BACK_DATA.TEST,
-};
-
-export const defaultKeyboard: InlineKeyboardButton[][] = [[getRatesButton, testButton]];
-
-export const defaultOptions: SendMessageOptions = {
-  reply_markup: {
-    inline_keyboard: defaultKeyboard,
-  },
-};
 
 export const currencies: Currency[] = ['USD', 'NZD', 'EUR', 'TRY'];
 
