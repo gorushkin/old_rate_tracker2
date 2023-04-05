@@ -5,15 +5,21 @@ import TelegramBot, {
   EditMessageTextOptions,
 } from 'node-telegram-bot-api';
 import { CALL_BACK_DATA } from './constants';
-import { convertRatesToString, getUserRates } from './utils';
+import {
+  convertRatesToString,
+  getHiddenMessage,
+  getUserRates,
+  validateCuurencyCode,
+} from './utils';
 import { scheduler } from '../utils/scheduler';
 import { ADMIN_ID } from '../utils/config';
 import { logger } from '../utils/logger';
 import { userService } from '../services/UserService';
 import { User } from '../entity/user';
-import { defaultOptions, settingsKeyboardOptions } from './keyboard';
+import { backToSettingsOptions, defaultOptions, settingsKeyboardOptions } from './keyboard';
 import { BotError } from './error';
 import { state } from './botState';
+import { Currency } from '../types';
 
 type Mapping = Record<
   CALL_BACK_DATA,
@@ -37,16 +43,16 @@ const mapping: Mapping = {
     return { message, options: settingsKeyboardOptions };
   },
   CURRENCIES: async () => {
-    const message = 'CURRENCIES';
-    return { message, options: settingsKeyboardOptions };
+    const message = 'Введите код валюты';
+    return { message, options: backToSettingsOptions };
   },
   REMINDER: async () => {
     const message = 'REMINDER';
-    return { message, options: settingsKeyboardOptions };
+    return { message, options: backToSettingsOptions };
   },
   TIME_ZONE: async () => {
     const message = 'TIME_ZONE';
-    return { message, options: settingsKeyboardOptions };
+    return { message, options: backToSettingsOptions };
   },
 };
 
@@ -71,11 +77,14 @@ const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
     action: `onCallbackQuery - ${data}`,
   });
 
-  bot.editMessageText(message, {
-    chat_id,
-    message_id,
-    ...options,
-  });
+  const hiddenMessage = getHiddenMessage(message);
+  bot.sendMessage(id, message, options);
+  // bot.editMessageText(hiddenMessage, {
+  //   chat_id,
+  //   message_id,
+  //   parse_mode: 'HTML',
+  //   ...options,
+  // });
 };
 
 const onStart = async (message: Message, bot: TelegramBot) => {
@@ -110,7 +119,15 @@ const onGetLogs = async (message: Message, bot: TelegramBot) => {
 };
 
 const onMessage = async (message: Message, bot: TelegramBot) => {
-  console.log('message: ', message);
+  const { text } = message;
+  const id = message.chat.id;
+  const mode = state.getState(id);
+  if (!mode) return bot.sendMessage(id, 'I do not know what you want!!!!');
+  if (mode === CALL_BACK_DATA.CURRENCIES) {
+    const validateionResult = await validateCuurencyCode(text as Currency);
+    console.log('validateionResult: ', validateionResult);
+  }
+  bot.sendMessage(id, 'asdfsadfdfd');
 };
 
 export const services = { onCallbackQuery, onStart, onGetRates, onGetLogs, onMessage };

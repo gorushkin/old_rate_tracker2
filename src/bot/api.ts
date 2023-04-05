@@ -5,7 +5,7 @@ import { Currency, Rates } from '../types';
 const getApiUrl = (currency: Currency, baseCurrency: Currency = 'RUB') =>
   `https://api.coingate.com/v2/rates/merchant/${currency}/${baseCurrency}`;
 
-const getCurrencyRate = async (currency: Currency): Promise<string> => {
+export const getCurrencyRate = async (currency: Currency): Promise<string> => {
   try {
     const { data } = await axios(getApiUrl(currency));
     return data;

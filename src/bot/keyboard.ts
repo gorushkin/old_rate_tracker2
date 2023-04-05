@@ -1,4 +1,8 @@
-import { EditMessageTextOptions, InlineKeyboardButton, SendMessageOptions } from 'node-telegram-bot-api';
+import {
+  EditMessageTextOptions,
+  InlineKeyboardButton,
+  SendMessageOptions,
+} from 'node-telegram-bot-api';
 import { CALL_BACK_DATA } from './constants';
 
 const getRatesButton: InlineKeyboardButton = {
@@ -31,12 +35,21 @@ const reminderButton: InlineKeyboardButton = {
   callback_data: CALL_BACK_DATA.REMINDER,
 };
 
-export const defaultKeyboard: InlineKeyboardButton[][] = [[getRatesButton, testButton, settingsButton]];
+const backToSettingsButton: InlineKeyboardButton = {
+  text: 'Back',
+  callback_data: CALL_BACK_DATA.SETTINGS,
+};
+
+export const defaultKeyboard: InlineKeyboardButton[][] = [
+  [getRatesButton, testButton, settingsButton],
+];
 
 const settingsKeyboard: InlineKeyboardButton[][] = [
-  [currenciesButton, timezoneButton, reminderButton],
-  [currenciesButton, timezoneButton, reminderButton],
+  [currenciesButton, timezoneButton],
+  [reminderButton, reminderButton],
 ];
+
+const backToSettingsKeyboard: InlineKeyboardButton[][] = [[backToSettingsButton]];
 
 export const defaultOptions: EditMessageTextOptions = {
   reply_markup: {
@@ -51,3 +64,5 @@ export const keyboadWrapper = (keyboard: InlineKeyboardButton[][]): EditMessageT
 });
 
 export const settingsKeyboardOptions = keyboadWrapper(settingsKeyboard);
+
+export const backToSettingsOptions = keyboadWrapper(backToSettingsKeyboard);

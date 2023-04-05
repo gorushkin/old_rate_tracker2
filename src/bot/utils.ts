@@ -1,4 +1,4 @@
-import { getRates } from './api';
+import { getCurrencyRate, getRates } from './api';
 import { minute } from './constants';
 import { Currency, Rates } from '../types';
 import { User } from '../entity/user';
@@ -37,4 +37,15 @@ export const getUserRates = (rates: Rates, user: User | null) => {
     const name = item.name as Currency;
     return { ...acc, ...(!!rates[name] && { [name]: rates[name] }) };
   }, {} as Rates);
+};
+
+
+export const getHiddenMessage = (message: string) => {
+  const encodeMessage = Buffer.from((new Date()).toISOString()).toString('base64');
+  return `<a href="tg://btn/${encodeMessage}">\u200b</a>${message}`;
+};
+
+export const validateCuurencyCode = async (code: Currency) => {
+  const result = await getCurrencyRate(code);
+  console.log('result: ', result);
 };
