@@ -1,16 +1,6 @@
-import TelegramBot, {
-  Message,
-  CallbackQuery,
-  SendMessageOptions,
-  EditMessageTextOptions,
-} from 'node-telegram-bot-api';
+import TelegramBot, { Message, CallbackQuery, EditMessageTextOptions } from 'node-telegram-bot-api';
 import { CALL_BACK_DATA } from './constants';
-import {
-  convertRatesToString,
-  getHiddenMessage,
-  getUserRates,
-  validateCuurencyCode,
-} from './utils';
+import { convertRatesToString, getCurData, getHiddenMessage, getUserRates } from './utils';
 import { scheduler } from '../utils/scheduler';
 import { ADMIN_ID } from '../utils/config';
 import { logger } from '../utils/logger';
@@ -19,11 +9,12 @@ import { User } from '../entity/user';
 import { backToSettingsOptions, defaultOptions, settingsKeyboardOptions } from './keyboard';
 import { BotError } from './error';
 import { state } from './botState';
-import { Currency } from '../types';
+import { TypeCurrency } from '../utils/types';
+import { currencyService } from '../services/CurrencyService';
 
 type Mapping = Record<
   CALL_BACK_DATA,
-  (user: User | null) => Promise<{ message: string; options: EditMessageTextOptions }>
+  (user: User) => Promise<{ message: string; options: EditMessageTextOptions }>
 >;
 
 const mapping: Mapping = {
@@ -39,26 +30,42 @@ const mapping: Mapping = {
     return { message, options: defaultOptions };
   },
   SETTINGS: async () => {
-    const message = 'settings';
+    const message =
+      'Здесь вы можете настроить валюты, включить напоминания, сменить свой часовой пояс';
     return { message, options: settingsKeyboardOptions };
   },
-  CURRENCIES: async () => {
-    const message = 'Введите код валюты';
-    return { message, options: backToSettingsOptions };
+  SET_CUR: async (user) => {
+    return await getCurData(user);
   },
-  REMINDER: async () => {
+  SET_RR: async () => {
     const message = 'REMINDER';
     return { message, options: backToSettingsOptions };
   },
-  TIME_ZONE: async () => {
+  SET_TZ: async () => {
+    const message = 'TIME_ZONE';
+    return { message, options: backToSettingsOptions };
+  },
+  SELECTED_CUR: async () => {
+    const message = 'TIME_ZONE';
+    return { message, options: backToSettingsOptions };
+  },
+  UNSELECTED_CUR: async () => {
     const message = 'TIME_ZONE';
     return { message, options: backToSettingsOptions };
   },
 };
 
+const updateUserCurrencies = async (name: string, user: User) => {
+  const currency = await currencyService.getCurrency(name as TypeCurrency);
+  if (!currency) throw new BotError('There i no currency!!!!');
+  const updatedUser = await userService.updateUserCurrencies(currency, user.id);
+  if (!updatedUser) throw new BotError('The user dissapeared!!!!');
+  return await getCurData(updatedUser);
+};
+
 const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
   if (!query.message) {
-    throw new BotError('The re is no message!!!!!');
+    throw new BotError('There is no message!!!!!');
   }
   const {
     message_id,
@@ -67,8 +74,18 @@ const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
 
   const data = query.data as CALL_BACK_DATA;
   const id = query.from.id;
-  const user = await userService.getUser(id);
-  const { message, options } = await mapping[data](user);
+  const username = query.from.username || 'username';
+  const user = await userService.forceAddUser(id, username);
+
+  if (!user) throw new BotError('Something went wrong');
+
+  const currencies = await state.getCurrencies();
+
+  const isCurrencyRequest = !!currencies.find((item) => item.name === data);
+
+  const { message, options } = isCurrencyRequest
+    ? await updateUserCurrencies(data as string, user)
+    : await mapping[data](user);
 
   state.setState(id, data);
 
@@ -78,21 +95,24 @@ const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
   });
 
   const hiddenMessage = getHiddenMessage(message);
-  bot.sendMessage(id, message, options);
-  // bot.editMessageText(hiddenMessage, {
-  //   chat_id,
-  //   message_id,
-  //   parse_mode: 'HTML',
-  //   ...options,
-  // });
+
+  if (data === CALL_BACK_DATA.GET_RATES) {
+    return bot.sendMessage(id, hiddenMessage, { ...options, parse_mode: 'HTML' });
+  }
+
+  bot.editMessageText(hiddenMessage, {
+    chat_id,
+    message_id,
+    parse_mode: 'HTML',
+    ...options,
+  });
 };
 
 const onStart = async (message: Message, bot: TelegramBot) => {
   const chatId = message.chat.id;
   const username = message.chat.username || 'username';
   const id = message.chat.id;
-  const user = await userService.getUser(id);
-  if (!user) await userService.addUser(id, username);
+  await userService.forceAddUser(id, username);
 
   bot.sendMessage(chatId, `Hi, ${username}`, defaultOptions);
 };
@@ -119,14 +139,9 @@ const onGetLogs = async (message: Message, bot: TelegramBot) => {
 };
 
 const onMessage = async (message: Message, bot: TelegramBot) => {
-  const { text } = message;
   const id = message.chat.id;
   const mode = state.getState(id);
   if (!mode) return bot.sendMessage(id, 'I do not know what you want!!!!');
-  if (mode === CALL_BACK_DATA.CURRENCIES) {
-    const validateionResult = await validateCuurencyCode(text as Currency);
-    console.log('validateionResult: ', validateionResult);
-  }
   bot.sendMessage(id, 'asdfsadfdfd');
 };
 

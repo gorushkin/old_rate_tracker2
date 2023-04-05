@@ -3,7 +3,10 @@ import {
   InlineKeyboardButton,
   SendMessageOptions,
 } from 'node-telegram-bot-api';
+import { User } from '../entity/user';
 import { CALL_BACK_DATA } from './constants';
+
+type Keyboard = InlineKeyboardButton[][];
 
 const getRatesButton: InlineKeyboardButton = {
   text: 'Get rates',
@@ -22,17 +25,17 @@ const settingsButton: InlineKeyboardButton = {
 
 const currenciesButton: InlineKeyboardButton = {
   text: ' Set Currencies',
-  callback_data: CALL_BACK_DATA.CURRENCIES,
+  callback_data: CALL_BACK_DATA.SET_CUR,
 };
 
 const timezoneButton: InlineKeyboardButton = {
   text: ' Set Timezone',
-  callback_data: CALL_BACK_DATA.TIME_ZONE,
+  callback_data: CALL_BACK_DATA.SET_TZ,
 };
 
 const reminderButton: InlineKeyboardButton = {
   text: ' Set Reminder',
-  callback_data: CALL_BACK_DATA.REMINDER,
+  callback_data: CALL_BACK_DATA.SET_RR,
 };
 
 const backToSettingsButton: InlineKeyboardButton = {
@@ -40,16 +43,19 @@ const backToSettingsButton: InlineKeyboardButton = {
   callback_data: CALL_BACK_DATA.SETTINGS,
 };
 
-export const defaultKeyboard: InlineKeyboardButton[][] = [
-  [getRatesButton, testButton, settingsButton],
-];
+const backToHomeButton: InlineKeyboardButton = {
+  text: 'Back',
+  callback_data: CALL_BACK_DATA.GET_RATES,
+};
 
-const settingsKeyboard: InlineKeyboardButton[][] = [
+const defaultKeyboard: Keyboard = [[getRatesButton, testButton, settingsButton]];
+
+const settingsKeyboard: Keyboard = [
   [currenciesButton, timezoneButton],
-  [reminderButton, reminderButton],
+  [reminderButton, backToHomeButton],
 ];
 
-const backToSettingsKeyboard: InlineKeyboardButton[][] = [[backToSettingsButton]];
+const backToSettingsKeyboard: Keyboard = [[backToSettingsButton]];
 
 export const defaultOptions: EditMessageTextOptions = {
   reply_markup: {
@@ -66,3 +72,21 @@ export const keyboadWrapper = (keyboard: InlineKeyboardButton[][]): EditMessageT
 export const settingsKeyboardOptions = keyboadWrapper(settingsKeyboard);
 
 export const backToSettingsOptions = keyboadWrapper(backToSettingsKeyboard);
+
+export const getCurrenciesOptions = (
+  list: {
+    isActive: boolean;
+    id: number;
+    name: string;
+    users: User[];
+  }[]
+) => {
+  const buttons: InlineKeyboardButton[] = list.map((item) => ({
+    text: `${item.name}${item.isActive ? '*' : ''}`,
+    callback_data: item.name,
+  }));
+
+  const keyboard: Keyboard = [buttons, [backToSettingsButton]];
+
+  return keyboadWrapper(keyboard);
+};

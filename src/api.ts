@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { currencies } from './constants';
-import { Currency, Rates } from '../types';
+import { currencies } from './bot/constants';
+import { TypeCurrency, Rates } from './utils/types';
 
-const getApiUrl = (currency: Currency, baseCurrency: Currency = 'RUB') =>
+const getApiUrl = (currency: TypeCurrency, baseCurrency: TypeCurrency = 'RUB') =>
   `https://api.coingate.com/v2/rates/merchant/${currency}/${baseCurrency}`;
 
-export const getCurrencyRate = async (currency: Currency): Promise<string> => {
+export const getCurrencyRate = async (currency: TypeCurrency): Promise<string> => {
   try {
     const { data } = await axios(getApiUrl(currency));
     return data;

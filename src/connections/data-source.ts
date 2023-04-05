@@ -9,5 +9,5 @@ export const AppDataSource = new DataSource({
   logging: false,
   entities: [User, Currency],
   subscribers: [],
-  migrations: ['./src/db/migrations/**/*.ts'],
+  migrations: ['./migrations/**/*.ts'],
 });
