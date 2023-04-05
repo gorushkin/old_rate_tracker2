@@ -1,5 +1,5 @@
-import { getRates } from './api';
-import { minute } from './constants';
+import { getRates } from './bot/api';
+import { minute } from './bot/constants';
 import { Rates } from './types';
 
 export const updateRates = async () => {

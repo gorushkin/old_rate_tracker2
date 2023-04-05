@@ -18,6 +18,7 @@ dist
 .nginx
 .env
 /data
+*.sqlite
 
 # Sentry
 .sentryclirc

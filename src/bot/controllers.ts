@@ -1,9 +1,10 @@
 import TelegramBot, { Message, CallbackQuery } from 'node-telegram-bot-api';
 import { CALL_BACK_DATA, defaultOptions } from './constants';
 import { convertRatesToString } from './utils';
-import { scheduler } from './scheduler';
-import { ADMIN_ID } from './config';
-import { logger } from './logger';
+import { scheduler } from '../scheduler';
+import { ADMIN_ID } from '../config';
+import { logger } from '../logger';
+import { db } from '../service';
 
 const mapping: Record<CALL_BACK_DATA, () => Promise<string>> = {
   GET_RATES: async () => {
@@ -27,6 +28,9 @@ const onCallbackQuery = async (message: CallbackQuery, bot: TelegramBot) => {
 const onStart = async (message: Message, bot: TelegramBot) => {
   const chatId = message.chat.id;
   const username = message.chat.username || 'username';
+  const id = message.chat.id;
+  const user = await db.getUser(id);
+  if (!user) await db.addUser(id, username);
 
   bot.sendMessage(chatId, `Hi, ${username}`, defaultOptions);
 };
