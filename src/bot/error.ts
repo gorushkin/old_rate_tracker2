@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { logger } from '../logger';
+import { logger } from '../utils/logger';
 
 export class BotError extends Error {
   constructor(message: string) {
@@ -22,6 +22,7 @@ export const errorHandler = async (
   try {
     await func;
   } catch (error) {
+    console.log('error: ', error);
     sendError('there is an error');
     logger.addAppLog({ name: routeName });
   }

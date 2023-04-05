@@ -1,6 +1,7 @@
 import { getRates } from './api';
 import { minute } from './constants';
-import { Rates } from '../types';
+import { Currency, Rates } from '../types';
+import { User } from '../entity/user';
 
 export const syncRate = () => {
   let lastUpdateTime = 0;
@@ -28,4 +29,12 @@ export const convertRatesToString = (data: Rates, date: string) => {
     .join('\n');
 
   return `${date}\n\n${formattedRates || 'we are fetching the data'}`;
+};
+
+export const getUserRates = (rates: Rates, user: User | null) => {
+  if (!user) return rates;
+  return user.currencies.reduce<Rates>((acc, item) => {
+    const name = item.name as Currency;
+    return { ...acc, ...(!!rates[name] && { [name]: rates[name] }) };
+  }, {} as Rates);
 };
