@@ -1,10 +1,11 @@
-import { TOKEN } from './config';
+import { TOKEN } from './utils/config';
 import TelegramBot from 'node-telegram-bot-api';
 import { addRoutes } from './bot/routes';
-import { scheduler } from './scheduler';
-import { logger } from './logger';
+import { scheduler } from './utils/scheduler';
+import { logger } from './utils/logger';
 import { BotError } from './bot/error';
-import { AppDataSource } from './db/data-source';
+import { AppDataSource } from './connections/data-source';
+import { currencyService } from './services/CurrencyService';
 
 if (!TOKEN) throw new Error('You should set bot token!');
 
@@ -12,6 +13,7 @@ const init = async (token: string) => {
   const bot = new TelegramBot(token, { polling: true });
   await AppDataSource.initialize();
   await AppDataSource.runMigrations();
+  await currencyService.init();
   (await scheduler).start();
 
   try {
