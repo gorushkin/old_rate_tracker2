@@ -4,7 +4,7 @@ import { convertRatesToString } from './utils';
 import { scheduler } from '../scheduler';
 import { ADMIN_ID } from '../config';
 import { logger } from '../logger';
-import { db } from '../index';
+import { db } from '../service';
 
 const mapping: Record<CALL_BACK_DATA, () => Promise<string>> = {
   GET_RATES: async () => {

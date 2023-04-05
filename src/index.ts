@@ -1,21 +1,17 @@
-import { TOKEN, DB_PATH } from './config';
+import { TOKEN } from './config';
 import TelegramBot from 'node-telegram-bot-api';
 import { addRoutes } from './bot/routes';
 import { scheduler } from './scheduler';
 import { logger } from './logger';
 import { BotError } from './bot/error';
-import { DB } from './db/db';
-import { DBError } from './db/error';
+import { AppDataSource } from './db/data-source';
 
 if (!TOKEN) throw new Error('You should set bot token!');
-if (!DB_PATH) throw new Error('You should set db path!');
-export const db = new DB();
 
-const init = async (token: string, db_path: string) => {
+const init = async (token: string) => {
   const bot = new TelegramBot(token, { polling: true });
-
-  await db.addPath(db_path);
-
+  await AppDataSource.initialize();
+  await AppDataSource.runMigrations();
   (await scheduler).start();
 
   try {
@@ -27,8 +23,7 @@ const init = async (token: string, db_path: string) => {
   }
 };
 
-init(TOKEN, DB_PATH).catch((error) => {
-  const message = error instanceof DBError ? error.message : 'error init';
-  logger.addAppLog({ name: message });
+init(TOKEN).catch((error) => {
+  console.log(error);
   process.exit(1);
 });

@@ -6,7 +6,6 @@ dev.db*
 package-lock.json
 build
 dist
-db
 
 # dependencies
 /node_modules
@@ -19,6 +18,7 @@ db
 .nginx
 .env
 /data
+*.sqlite
 
 # Sentry
 .sentryclirc
