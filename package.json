@@ -9,8 +9,8 @@
     "dev": "nodemon -x ts-node -e ts src/index.ts",
     "start": "node dist/index.js",
     "typeorm": "typeorm-ts-node-esm",
-    "generate": "typeorm-ts-node-esm migration:generate -d src/db/data-source.ts -p",
-    "migrations": "npm run typeorm migration:run -- -d src/db/data-source.ts",
+    "generate": "typeorm-ts-node-esm migration:generate -d src/connections/data-source.ts -p",
+    "migrations": "npm run typeorm migration:run -- -d src/connections/data-source.ts",
     "create": "npm run typeorm migration:create --"
   },
   "keywords": [],

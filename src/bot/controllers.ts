@@ -1,6 +1,12 @@
 import TelegramBot, { Message, CallbackQuery, EditMessageTextOptions } from 'node-telegram-bot-api';
-import { CALL_BACK_DATA } from './constants';
-import { convertRatesToString, getCurData, getHiddenMessage, getUserRates } from './utils';
+import { CALL_BACK_DATA, commandsList } from './constants';
+import {
+  convertRatesToString,
+  getCurData,
+  getHiddenMessage,
+  getUserRates,
+  isTimeZoneOffsetCorrect,
+} from './utils';
 import { scheduler } from '../utils/scheduler';
 import { ADMIN_ID } from '../utils/config';
 import { logger } from '../utils/logger';
@@ -8,7 +14,7 @@ import { userService } from '../services/UserService';
 import { User } from '../entity/user';
 import { backToSettingsOptions, defaultOptions, settingsKeyboardOptions } from './keyboard';
 import { BotError } from './error';
-import { state } from './botState';
+import { state, UserDTO } from './botState';
 import { TypeCurrency } from '../utils/types';
 import { currencyService } from '../services/CurrencyService';
 
@@ -16,6 +22,20 @@ type Mapping = Record<
   CALL_BACK_DATA,
   (user: User) => Promise<{ message: string; options: EditMessageTextOptions }>
 >;
+
+const onTimeZoneOffset = async (bot: TelegramBot, { user: { id } }: UserDTO, message: Message) => {
+  const timezoneOffset = message.text || '';
+  // TODO: Добавить ошибку валидации с выводом нужной клавиатуры
+  if (!isTimeZoneOffsetCorrect(timezoneOffset)) {
+    return bot.sendMessage(
+      id,
+      'Неправильный формат.\nПопробуйте заново или вернитесь назад',
+      backToSettingsOptions
+    );
+  }
+  await userService.updateUserTimeZoneOffset(id, timezoneOffset);
+  bot.sendMessage(id, `Ваша новый часовой пояс ${timezoneOffset}`, backToSettingsOptions);
+};
 
 const mapping: Mapping = {
   GET_RATES: async (user) => {
@@ -41,8 +61,9 @@ const mapping: Mapping = {
     const message = 'REMINDER';
     return { message, options: backToSettingsOptions };
   },
-  SET_TZ: async () => {
-    const message = 'TIME_ZONE';
+  SET_TZ: async (user) => {
+    const { timeZoneOffset: timezoneOffset } = user;
+    const message = `Введите смещение часового пояса в формате "+/-hh:00".\nВаше текущее смещение: ${timezoneOffset}`;
     return { message, options: backToSettingsOptions };
   },
   SELECTED_CUR: async () => {
@@ -87,7 +108,7 @@ const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
     ? await updateUserCurrencies(data as string, user)
     : await mapping[data](user);
 
-  state.setState(id, data);
+  state.setState(id, { user, mode: data });
 
   logger.addUserRequestLog({
     username: query.from.username,
@@ -140,8 +161,16 @@ const onGetLogs = async (message: Message, bot: TelegramBot) => {
 
 const onMessage = async (message: Message, bot: TelegramBot) => {
   const id = message.chat.id;
-  const mode = state.getState(id);
-  if (!mode) return bot.sendMessage(id, 'I do not know what you want!!!!');
+  const user = state.getState(id);
+
+  const isMessageFromCommandList = commandsList.find(({ command }) => command === message.text);
+  if (isMessageFromCommandList) return;
+
+  if (!user) return bot.sendMessage(id, 'I do not know what you want!!!!');
+
+  if (user.mode === CALL_BACK_DATA.SET_TZ) {
+    return onTimeZoneOffset(bot, user, message);
+  }
   bot.sendMessage(id, 'asdfsadfdfd');
 };
 

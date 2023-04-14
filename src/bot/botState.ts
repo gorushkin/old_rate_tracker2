@@ -1,8 +1,12 @@
 import { CALL_BACK_DATA } from './constants';
 import { Currency } from '../entity/currency';
 import { currencyService } from '../services/CurrencyService';
+import { User } from '../entity/user';
+
+export type UserDTO = { user: User; mode: CALL_BACK_DATA };
+
 class State {
-  private state: Map<number, CALL_BACK_DATA>;
+  private state: Map<number, UserDTO>;
   private currencies: Currency[];
 
   constructor() {
@@ -12,11 +16,11 @@ class State {
 
   init = async () => {
     const res = await currencyService.getCurrencies();
-    this.currencies = res
+    this.currencies = res;
   };
 
-  setState = (id: number, mode: CALL_BACK_DATA) => {
-    this.state.set(id, mode);
+  setState = (id: number, userDto: UserDTO) => {
+    this.state.set(id, userDto);
   };
 
   getState = (id: number) => {

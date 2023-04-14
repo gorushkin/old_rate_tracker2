@@ -6,6 +6,8 @@ import { Currency } from '../entity/currency';
 
 const defaultUserCurrencyName: TypeCurrency = 'RUB';
 
+const defaultTimeZoneOffset = '+00:00';
+
 class UserService {
   async getUser(id: number) {
     return await await User.findOne({
@@ -29,6 +31,7 @@ class UserService {
     user.role = role;
     user.currencies = [...(USD ? [USD] : []), ...(TRY ? [TRY] : [])];
     user.firstName = '';
+    user.timeZoneOffset = defaultTimeZoneOffset;
     if (defaultCurrency) {
       user.defaultCurrency = defaultCurrency;
     }
@@ -62,6 +65,10 @@ class UserService {
     );
     const action = isCurrencyExistInUserList ? this.removeCurrency : this.addCurrency;
     return await action(currency, user);
+  }
+
+  async updateUserTimeZoneOffset(id: number, timeZoneOffset: string) {
+    await User.update({ id }, { timeZoneOffset });
   }
 }
 

@@ -64,3 +64,8 @@ export const getCurData = async (user: User) => {
   const message = `Здесь вы можете настроить валюты\nВаши валюты: ${userCurrenciesText}\nВсе валюты: ${filteredСurrenciesText}`;
   return { message, options: currenciesOptions };
 };
+
+export const isTimeZoneOffsetCorrect = (timeZoneOffset: string) => {
+  // TODO: Сделать ввлидацию
+  return timeZoneOffset === '+03:00';
+};
