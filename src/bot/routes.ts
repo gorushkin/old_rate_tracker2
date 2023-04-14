@@ -40,6 +40,14 @@ export const addRoutes = async (bot: TelegramBot) => {
     )
   );
 
+  bot.on('message', (message) => {
+    errorHandler(
+      services.onMessage(message, bot),
+      'onMessage',
+      sendErrorMessage(message.chat.id, bot)
+    );
+  });
+
   bot.on('error', (e) => {
     console.log(e);
   });

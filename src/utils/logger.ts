@@ -9,7 +9,7 @@ const logVault = () => {
   const logs: string[] = [];
 
   const addLog = (log: string) => {
-    console.log(log);
+    // console.log(log);
     logs.push(log);
   };
 

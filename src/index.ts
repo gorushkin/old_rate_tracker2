@@ -12,7 +12,6 @@ if (!TOKEN) throw new Error('You should set bot token!');
 const init = async (token: string) => {
   const bot = new TelegramBot(token, { polling: true });
   await AppDataSource.initialize();
-  await AppDataSource.runMigrations();
   await currencyService.init();
   (await scheduler).start();
 
