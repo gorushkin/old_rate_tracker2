@@ -46,13 +46,25 @@ export const getHiddenMessage = (message: string) => {
   return `<a href="tg://btn/${encodeMessage}">\u200b</a>${message}`;
 };
 
-export const getCurData = async (user: User) => {
+export const isTimeZoneOffsetCorrect = (timeZoneOffset: string) => {
+  // TODO: Сделать ввлидацию
+  return timeZoneOffset === '+03:00';
+};
+
+export const getCurrenciesInfo = async (user: User) => {
   const userCurrenciesText = user.currencies.map(({ name }) => name).join(', ');
   const allСurrencies = await state.getCurrencies();
   const filteredСurrencies = allСurrencies.filter(
     ({ name }) => name !== user.defaultCurrency?.name
   );
   const filteredСurrenciesText = filteredСurrencies.map(({ name }) => name).join(', ');
+
+  return { userCurrenciesText, filteredСurrenciesText };
+};
+
+export const getCurrenciesKeyboard = async (user: User) => {
+  const allСurrencies = await state.getCurrencies();
+
   const allСurrenciesWithExtraInfo = allСurrencies
     .filter(({ name }) => name !== user.defaultCurrency?.name)
     .map((currency) => ({
@@ -61,11 +73,6 @@ export const getCurData = async (user: User) => {
     }));
 
   const currenciesOptions = getCurrenciesOptions(allСurrenciesWithExtraInfo);
-  const message = `Здесь вы можете настроить валюты\nВаши валюты: ${userCurrenciesText}\nВсе валюты: ${filteredСurrenciesText}`;
-  return { message, options: currenciesOptions };
-};
 
-export const isTimeZoneOffsetCorrect = (timeZoneOffset: string) => {
-  // TODO: Сделать ввлидацию
-  return timeZoneOffset === '+03:00';
+  return currenciesOptions;
 };

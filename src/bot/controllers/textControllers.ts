@@ -1,0 +1,37 @@
+import TelegramBot, { Message } from 'node-telegram-bot-api';
+import { userService } from '../../services/UserService';
+import { ADMIN_ID } from '../../utils/config';
+import { logger } from '../../utils/logger';
+import { scheduler } from '../../utils/scheduler';
+import { defaultOptions } from '../keyboard';
+import { getUserRates, convertRatesToString } from '../utils';
+
+export const onStartText = async (message: Message, bot: TelegramBot) => {
+  const chatId = message.chat.id;
+  const username = message.chat.username || 'username';
+  const id = message.chat.id;
+  await userService.forceAddUser(id, username);
+
+  bot.sendMessage(chatId, `Hi, ${username}`, defaultOptions);
+};
+
+export const onGetRatesText = async (message: Message, bot: TelegramBot) => {
+  const id = message.chat.id;
+  const user = await userService.getUser(id);
+  if (!user?.currencies) {
+    bot.sendMessage(id, 'There is currencies. Please, update your settings', defaultOptions);
+  }
+  const { rates, date } = (await scheduler).getInfo();
+  const userRates = getUserRates(rates, user);
+  logger.addUserRequestLog({ username: message.chat.username, action: 'onGetRates' });
+  bot.sendMessage(id, convertRatesToString(userRates, date), defaultOptions);
+};
+
+export const onGetLogs = async (message: Message, bot: TelegramBot) => {
+  const chatId = message.chat.id;
+  logger.addUserRequestLog({ username: message.chat.username, action: 'onGetLogs' });
+  const logs = logger.getLogs();
+  const id = message.from?.id;
+  const messageText = id == ADMIN_ID ? logs : 'No!!!';
+  bot.sendMessage(chatId, messageText, defaultOptions);
+};
