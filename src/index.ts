@@ -1,7 +1,7 @@
 import { TOKEN } from './utils/config';
 import TelegramBot from 'node-telegram-bot-api';
 import { addRoutes } from './bot/routes';
-import { scheduler } from './utils/scheduler';
+import { updater } from './utils/rateUpdater';
 import { logger } from './utils/logger';
 import { BotError } from './bot/error';
 import { AppDataSource } from './connections/data-source';
@@ -13,7 +13,7 @@ const init = async (token: string) => {
   const bot = new TelegramBot(token, { polling: true });
   await AppDataSource.initialize();
   await currencyService.init();
-  (await scheduler).start();
+  await updater.start();
 
   try {
     await addRoutes(bot);

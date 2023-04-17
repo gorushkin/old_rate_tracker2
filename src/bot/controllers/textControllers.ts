@@ -2,7 +2,7 @@ import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { userService } from '../../services/UserService';
 import { ADMIN_ID } from '../../utils/config';
 import { logger } from '../../utils/logger';
-import { scheduler } from '../../utils/scheduler';
+import { updater } from '../../utils/rateUpdater';
 import { defaultOptions } from '../keyboard';
 import { getUserRates, convertRatesToString } from '../utils';
 
@@ -21,7 +21,7 @@ export const onGetRatesText = async (message: Message, bot: TelegramBot) => {
   if (!user?.currencies) {
     bot.sendMessage(id, 'There is currencies. Please, update your settings', defaultOptions);
   }
-  const { rates, date } = (await scheduler).getInfo();
+  const { rates, date } = await updater.getRates();
   const userRates = getUserRates(rates, user);
   logger.addUserRequestLog({ username: message.chat.username, action: 'onGetRates' });
   bot.sendMessage(id, convertRatesToString(userRates, date), defaultOptions);

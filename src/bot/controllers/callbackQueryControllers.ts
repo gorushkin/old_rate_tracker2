@@ -7,7 +7,7 @@ import {
   getHiddenMessage,
   getUserRates,
 } from '../utils';
-import { scheduler } from '../../utils/scheduler';
+import { updater } from '../../utils/rateUpdater';
 import { backToSettingsOptions, defaultOptions, settingsKeyboardOptions } from '../keyboard';
 import { currencyService } from '../../services/CurrencyService';
 import { userService } from '../../services/UserService';
@@ -20,7 +20,7 @@ export const onGetRatesCallbackQuery = async (
   _message_id: number,
   user: User
 ) => {
-  const { rates, date } = (await scheduler).getInfo();
+  const { rates, date } = await updater.getRates();
   const userRates = getUserRates(rates, user);
   const message = convertRatesToString(userRates, date);
   const options = defaultOptions;
