@@ -2,18 +2,19 @@ import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { userService } from '../../services/UserService';
 import { UserDTO } from '../botState';
 import { backToSettingsOptions } from '../keyboard';
-import { isTimeZoneOffsetCorrect } from '../utils';
+import { formatTimeZoneOffset, getTimeZoneOffset as getTimeZoneOffset } from '../utils';
 
 export  const onUpdateTimeZoneOffset = async (bot: TelegramBot, { user: { id } }: UserDTO, message: Message) => {
-  const timezoneOffset = message.text || '';
-  // TODO: Добавить ошибку валидации с выводом нужной клавиатуры
-  if (!isTimeZoneOffsetCorrect(timezoneOffset)) {
+  const timeZoneOffset = getTimeZoneOffset(message.text || '');
+  if (!timeZoneOffset && timeZoneOffset !== 0) {
     return bot.sendMessage(
       id,
       'Неправильный формат.\nПопробуйте заново или вернитесь назад',
       backToSettingsOptions
     );
   }
-  await userService.updateUserTimeZoneOffset(id, Number(timezoneOffset));
-  bot.sendMessage(id, `Ваша новый часовой пояс ${timezoneOffset}`, backToSettingsOptions);
+  const formattedTimeZoneOffset = formatTimeZoneOffset(timeZoneOffset);
+
+  await userService.updateUserTimeZoneOffset(id, Number(timeZoneOffset));
+  bot.sendMessage(id, `Ваш новый часовой пояс ${formattedTimeZoneOffset}`, backToSettingsOptions);
 };

@@ -24,9 +24,25 @@ export const getHiddenMessage = (message: string) => {
   return `<a href="tg://btn/${encodeMessage}">\u200b</a>${message}`;
 };
 
-export const isTimeZoneOffsetCorrect = (timeZoneOffset: string) => {
-  // TODO: Сделать ввлидацию
-  return timeZoneOffset === '+03:00';
+export const getTimeZoneOffset = (timeZoneOffset: string) => {
+  const isNumeric = (str: string) => {
+    if (typeof str !== 'string') return null;
+    return !Number.isNaN(str) && !isNaN(parseFloat(str));
+  };
+
+  const prefix = timeZoneOffset.slice(0, 1);
+  if (prefix !== '+' && prefix !== '-') return null;
+
+  const mathSign = prefix === '+' ? 1 : -1;
+  const rawOffset = timeZoneOffset.split('').slice(1);
+
+  if (rawOffset.length > 5 || rawOffset.length < 4) return null;
+  if (rawOffset.length === 5 && rawOffset[2] !== ':') return null;
+  const offset = rawOffset.filter(isNumeric);
+  if (offset.length < 4) return false;
+  const hh = Number(offset.slice(0, 2).join(''));
+  const mm = Number(offset.slice(2, 4).join(''));
+  return (hh * 60 + mm) * mathSign;
 };
 
 export const getCurrenciesInfo = async (user: User) => {
@@ -71,4 +87,16 @@ export const getUserDate = (date: string, offset: number) => {
   }).format(userTime);
 
   return formattedUserTime;
+};
+
+export const formatTimeZoneOffset = (timeZoneOffset: number) => {
+  const absoluteValue = Math.abs(timeZoneOffset);
+  const hh = Math.trunc(absoluteValue / 60);
+  const mm = absoluteValue - hh * 60;
+  const prefix = timeZoneOffset >= 0 ? '+' : '-';
+
+  const formattedHH = hh < 10 ? `0${hh}` : hh.toString();
+  const formattedMM = mm < 10 ? `0${mm}` : mm.toString();
+
+  return `${prefix}${formattedHH}:${formattedMM}`;
 };

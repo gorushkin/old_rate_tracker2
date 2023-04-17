@@ -2,6 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { User } from '../../entity/user';
 import {
   convertRatesToString,
+  formatTimeZoneOffset,
   getCurrenciesInfo,
   getCurrenciesKeyboard,
   getHiddenMessage,
@@ -140,10 +141,9 @@ export const onSetTimeZoneOffsetCallbackQuery = async (
 ) => {
   const { timeZoneOffset } = user;
 
-  const message = `Введите смещение часового пояса в формате "+/-hh:00".\nВаше текущее смещение: ${timeZoneOffset}`;
-
+  const formattedTimeZoneOffset = formatTimeZoneOffset(timeZoneOffset);
+  const message = `Введите смещение часового пояса в формате "±[hh]:[mm]" или "±[hh][mm]".\nВаше текущее смещение: ${formattedTimeZoneOffset}`;
   const options = backToSettingsOptions;
-
   const hiddenMessage = getHiddenMessage(message);
 
   bot.editMessageText(hiddenMessage, {
