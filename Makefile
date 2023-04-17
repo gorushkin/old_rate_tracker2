@@ -7,6 +7,7 @@ build:
 create:
 	docker create --name bot \
 	--env-file ./.env \
+	-v "$$(pwd)"/db/:/app/db/ \
 	 rate_tracker
 
 start:
