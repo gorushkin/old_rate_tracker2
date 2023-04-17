@@ -10,7 +10,7 @@ export enum COMMAND {
 }
 
 export const commandsList = [
-  { command: COMMAND.START, description: "Let's go" },
+  { command: COMMAND.START, description: 'Let\'s go' },
   { command: COMMAND.INFO, description: 'Some info' },
   { command: COMMAND.GET_RATE, description: 'Get usd rate' },
   { command: COMMAND.GET_LOGS, description: 'Get all logs' },
@@ -23,8 +23,6 @@ export enum CALL_BACK_DATA {
   SET_TZ = 'SET_TZ',
   SET_CUR = 'SET_CUR',
   SET_RR = 'SET_RR',
-  SELECTED_CUR = 'SELECTED_CUR',
-  UNSELECTED_CUR = 'UNSELECTED_CUR',
 }
 
 export const currencies: TypeCurrency[] = ['USD', 'NZD', 'EUR', 'TRY'];
