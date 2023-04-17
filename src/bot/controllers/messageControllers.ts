@@ -14,6 +14,6 @@ export  const onUpdateTimeZoneOffset = async (bot: TelegramBot, { user: { id } }
       backToSettingsOptions
     );
   }
-  await userService.updateUserTimeZoneOffset(id, timezoneOffset);
+  await userService.updateUserTimeZoneOffset(id, Number(timezoneOffset));
   bot.sendMessage(id, `Ваша новый часовой пояс ${timezoneOffset}`, backToSettingsOptions);
 };

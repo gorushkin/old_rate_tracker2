@@ -16,7 +16,7 @@ class RatesUpdater {
 
   async #updateRates() {
     this.#ratesData = await getRates();
-    this.#requestDate = new Date().toLocaleString();
+    this.#requestDate = new Date().toISOString();
     setTimeout(this.#updateRates, minute * 10);
   }
 

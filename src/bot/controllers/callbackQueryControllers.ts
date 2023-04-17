@@ -5,6 +5,7 @@ import {
   getCurrenciesInfo,
   getCurrenciesKeyboard,
   getHiddenMessage,
+  getUserDate,
   getUserRates,
 } from '../utils';
 import { updater } from '../../utils/rateUpdater';
@@ -21,8 +22,9 @@ export const onGetRatesCallbackQuery = async (
   user: User
 ) => {
   const { rates, date } = await updater.getRates();
+  const userDate = getUserDate(date, user.timeZoneOffset);
   const userRates = getUserRates(rates, user);
-  const message = convertRatesToString(userRates, date);
+  const message = convertRatesToString(userRates, userDate);
   const options = defaultOptions;
 
   bot.sendMessage(user.id, message, { ...options, parse_mode: 'HTML' });

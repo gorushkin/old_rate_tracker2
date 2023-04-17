@@ -1,29 +1,7 @@
-import { getRates } from '../api';
-import { minute } from './constants';
 import { TypeCurrency, Rates } from '../utils/types';
 import { User } from '../entity/user';
 import { state } from './botState';
 import { getCurrenciesOptions } from './keyboard';
-
-export const syncRate = () => {
-  let lastUpdateTime = 0;
-  let rates: Rates;
-
-  return async () => {
-    const currentTime = Date.now();
-    const shouldUpdate = currentTime - lastUpdateTime >= minute * 10;
-    if (shouldUpdate) {
-      rates = await getRates();
-      lastUpdateTime = currentTime;
-    }
-
-    const formattedLastUpdateTime = new Date(lastUpdateTime).toLocaleString();
-
-    return { rates, date: formattedLastUpdateTime };
-  };
-};
-
-export const getRate = syncRate();
 
 export const convertRatesToString = (data: Rates, date: string) => {
   const formattedRates = Object.entries(data)
@@ -75,4 +53,22 @@ export const getCurrenciesKeyboard = async (user: User) => {
   const currenciesOptions = getCurrenciesOptions(allСurrenciesWithExtraInfo);
 
   return currenciesOptions;
+};
+
+export const getUserDate = (date: string, offset: number) => {
+  const requestDate = new Date(date);
+
+  const hh = requestDate.getUTCHours();
+  const mm = requestDate.getUTCMinutes();
+  const userTime = requestDate.setHours(hh, mm + offset);
+
+  const formattedUserTime = new Intl.DateTimeFormat('ru-RU', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(userTime);
+
+  return formattedUserTime;
 };

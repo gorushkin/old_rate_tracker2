@@ -24,7 +24,7 @@ export class User extends BaseEntity {
   role: string;
 
   @Column()
-  timeZoneOffset: string;
+  timeZoneOffset: number;
 
   @ManyToMany(() => Currency)
   @JoinTable()

@@ -6,7 +6,7 @@ import { Currency } from '../entity/currency';
 
 const defaultUserCurrencyName: TypeCurrency = 'RUB';
 
-const defaultTimeZoneOffset = '+00:00';
+const defaultTimeZoneOffset = 180;
 
 class UserService {
   async getUser(id: number) {
@@ -67,7 +67,7 @@ class UserService {
     return await action(currency, user);
   }
 
-  async updateUserTimeZoneOffset(id: number, timeZoneOffset: string) {
+  async updateUserTimeZoneOffset(id: number, timeZoneOffset: number) {
     await User.update({ id }, { timeZoneOffset });
   }
 }
