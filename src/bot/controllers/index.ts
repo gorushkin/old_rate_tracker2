@@ -36,7 +36,7 @@ const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
   const username = query.from.username || 'username';
   const user = await userService.forceAddUser(id, username);
 
-  if (!user) throw new BotError('Something went wrong');
+  if (!user) throw new BotError('', { type: 'user', id, username: '', bot });
 
   const actions = Object.keys(CALL_BACK_DATA);
 

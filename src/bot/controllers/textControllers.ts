@@ -19,8 +19,7 @@ export const onStartText = async (message: Message, bot: TelegramBot) => {
 export const onGetRatesText = async (message: Message, bot: TelegramBot) => {
   const id = message.chat.id;
   const user = await userService.getUser(id);
-
-  if (!user) throw new BotError('There is no user!!!!');
+  if (!user) throw new BotError('', { type: 'user', id, username: '', bot });
 
   if (!user?.currencies) {
     bot.sendMessage(id, 'There is currencies. Please, update your settings', defaultOptions);
