@@ -117,7 +117,8 @@ export const onSelectCurrenciesCallbackQuery = async (
   const currency = await currencyService.getCurrency(name as TypeCurrency);
   if (!currency) throw new BotError('There is no currency!!!!');
   const updatedUser = await userService.updateUserCurrencies(currency, user.id);
-  if (!updatedUser) throw new BotError('The user dissapeared!!!!');
+  if (!updatedUser)
+    throw new BotError('', { type: 'user', id: user.id, username: user.username, bot });
 
   const { userCurrenciesText, filteredСurrenciesText } = await getCurrenciesInfo(updatedUser);
   const options = await getCurrenciesKeyboard(updatedUser);
@@ -152,4 +153,15 @@ export const onSetTimeZoneOffsetCallbackQuery = async (
     parse_mode: 'HTML',
     ...options,
   });
+};
+
+export const onStartCallbackQuery = async (
+  bot: TelegramBot,
+  _chat_id: number,
+  _message_id: number,
+  user: User
+) => {
+  const options = defaultOptions;
+
+  bot.sendMessage(user.id, `Hi, ${user.username}`, { ...options, parse_mode: 'HTML' });
 };

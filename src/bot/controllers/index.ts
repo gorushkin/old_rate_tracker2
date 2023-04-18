@@ -1,13 +1,13 @@
 import TelegramBot, { Message, CallbackQuery } from 'node-telegram-bot-api';
 import { CALL_BACK_DATA, commandsList } from '../constants';
 
-// import { logger } from '../../utils/logger';
 import { userService } from '../../services/UserService';
 import { User } from '../../entity/user';
 import { BotError } from '../error';
 import { state } from '../botState';
 import * as queryCotrollers from './callbackQueryControllers';
 import { onUpdateTimeZoneOffset } from './messageControllers';
+import * as onTextControllers from './textControllers';
 
 type Mapping = Record<
   CALL_BACK_DATA,
@@ -31,35 +31,35 @@ const onCallbackQuery = async (query: CallbackQuery, bot: TelegramBot) => {
     chat: { id: chat_id },
   } = query.message;
 
-  const data = query.data as CALL_BACK_DATA;
+  const mode = query.data as CALL_BACK_DATA;
   const id = query.from.id;
   const username = query.from.username || 'username';
   const user = await userService.forceAddUser(id, username);
 
   if (!user) throw new BotError('Something went wrong');
 
-  // logger.addUserRequestLog({
-  //   username: query.from.username,
-  //   action: `onCallbackQuery - ${data}`,
-  // });
-
-  state.setState(id, { user, mode: data });
+  const actions = Object.keys(CALL_BACK_DATA);
 
   const currencies = await state.getCurrencies();
+  const isCurrencyRequest = !!currencies.find((item) => item.name === mode);
 
-  const isCurrencyRequest = !!currencies.find((item) => item.name === data);
+  const userState = state.getState(id);
 
-  if (isCurrencyRequest) {
+  if (!userState) throw new BotError('User dissapeared!!!!');
+
+  if (isCurrencyRequest && userState.mode === CALL_BACK_DATA.SET_CUR) {
     return await queryCotrollers.onSelectCurrenciesCallbackQuery(
       bot,
-      data as string,
+      mode as string,
       user,
       chat_id,
       message_id
     );
   }
 
-  const action = mapping[data];
+  if (actions.includes(mode)) state.setState(id, { user, mode });
+
+  const action = mapping[mode];
   await action(bot, chat_id, message_id, user);
 };
 
@@ -70,12 +70,10 @@ const onMessage = async (message: Message, bot: TelegramBot) => {
   const isMessageFromCommandList = commandsList.find(({ command }) => command === message.text);
   if (isMessageFromCommandList) return;
 
-  if (!user) return bot.sendMessage(id, 'I do not know what you want!!!!');
+  if (!user) throw new BotError('', { type: 'user', id, username: '', bot });
 
-  if (user.mode === CALL_BACK_DATA.SET_TZ) {
-    return onUpdateTimeZoneOffset(bot, user, message);
-  }
-  bot.sendMessage(id, 'asdfsadfdfd');
+  if (user.mode === CALL_BACK_DATA.SET_TZ) return onUpdateTimeZoneOffset(bot, user, message);
+  onTextControllers.onStartText(message, bot);
 };
 
 export const controllers = { onCallbackQuery, onMessage };
